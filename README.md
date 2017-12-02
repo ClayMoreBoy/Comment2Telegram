@@ -7,6 +7,9 @@
 3. 然后填写 Telegram Bot Token 和 Telegram ID（可通过 Start `@NekoMoe_Bot`，发送 `/whoami` 获得
 4. Enjoy ~
 
+## 注意
+由于 Telegram 官方的限制，当使用 `插件处理` 时，请使用 HTTPS 模式
+
 ## 关于 `回复处理`
 建议直接使用插件进行处理，如果Bot还需实现有其他功能的话。。就选择 `外部处理`
 关于如何使用。。请参考 https://jcl.moe/archives/Comment2Telegram-Plugin-API.html
