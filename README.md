@@ -7,6 +7,9 @@
 3. 然后填写 Telegram Bot Token 和 Telegram ID（可通过 Start `@NekoMoe_Bot`，发送 `/whoami` 获得
 4. Enjoy ~
 
+## 截图
+![截图](http://forum.typecho.org/download/file.php?id=1294)
+
 ## 注意
 由于 Telegram 官方的限制，当使用 `插件处理` 时，请使用 HTTPS 模式
 
