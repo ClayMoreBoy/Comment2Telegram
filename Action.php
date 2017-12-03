@@ -55,6 +55,9 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
      * @access public
      */
     public function CallBack () {
+        if ($this->_cfg->mode != 0) {
+            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+        }
         $data = json_decode (file_get_contents ("php://input"), true);
         if (empty($data)) {
             exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
@@ -69,9 +72,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
                 'text' => $data['message']['text'],
                 'parent' => $match[5]
             ];
-            if ($this->_cfg->mode == 0) {
-                $ret = $this->CommentAdd($CommentData);
-            }
+            $ret = $this->CommentAdd($CommentData);
             
             if ($ret['code'] == 0) {
                 $GLOBALS['telegramModel']->sendMessage ($data['message']['chat']['id'], '回复成功');
@@ -87,9 +88,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
                     $CommentData = [
                         'coid' => $coid
                     ];
-                    if ($this->_cfg->mode == 0) {
-                        $ret = $this->CommentDel ($CommentData);
-                    }
+                    $ret = $this->CommentDel ($CommentData);
                     if ($ret['code'] == 0) {
                         $GLOBALS['telegramModel']->editMessage ($callback_query['message']['chat']['id'], $callback_query['message']['message_id'], '删除成功');
                     } else {
@@ -100,21 +99,58 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
                         'coid' => $coid,
                         'status' => 'spam'
                     ];
-                    if ($this->_cfg->mode == 0) {
-                        $ret = $this->CommentMark ($CommentData);
-                    }
+                    $ret = $this->CommentMark ($CommentData);
                     if ($ret['code'] == 0) {
-                        $GLOBALS['telegramModel']->sendMessage ($callback_query['message']['chat']['id'], '标记垃圾评论成功');
+                        $button = json_encode (array (
+                            'inline_keyboard' => array (
+                                array (array (
+                                    'text' => '通过评论',
+                                    'callback_data' => 'approved_' . $coid
+                                )),
+                                array (array (
+                                    'text' => '删除评论',
+                                    'callback_data' => 'delete_' . $coid
+                                ))
+                            )
+                        ));
+                        $text = '#垃圾评论
+' . $data['callback_query']['message']['text'];
+                        $GLOBALS['telegramModel']->editMessage ($callback_query['message']['chat']['id'], $data['callback_query']['message']['message_id'], $text, $button);
                     } else {
                         $GLOBALS['telegramModel']->sendMessage ($callback_query['message']['chat']['id'], '标记垃圾评论失败');
                     }
-                } 
+                } else if ($callbackExplode[0] == 'approved') {
+                    $CommentData = [
+                        'coid' => $coid,
+                        'status' => 'approved'
+                    ];
+                    $ret = $this->CommentMark ($CommentData);
+                    if ($ret['code'] == 0) {
+                        $button = json_encode (array (
+                            'inline_keyboard' => array (
+                                array (array (
+                                    'text' => '垃圾评论',
+                                    'callback_data' => 'spam_' . $coid
+                                )),
+                                array (array (
+                                    'text' => '删除评论',
+                                    'callback_data' => 'delete_' . $coid
+                                ))
+                            )
+                        ));
+                        $text = $data['callback_query']['message']['text'];
+                        $text = str_replace('#垃圾评论', '', $text);
+                        $GLOBALS['telegramModel']->editMessage ($callback_query['message']['chat']['id'], $data['callback_query']['message']['message_id'], $text, $button);
+                    } else {
+                        $this->telegram->sendMessage ($chat['id'], '通过评论失败');
+                    }
+                }
             }
         }
     }
     
     public function CommentAdd ($data = NULL) {
-        if ($this->_cfg->mode == 0 || empty($data)) {
+        if ($this->_cfg->mode == 0) {
             $cid = $data['cid'];
             $author = $data['author'];
             $text = $data['text'];
@@ -159,7 +195,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     }
     
     public function CommentDel ($data = NULL) {
-        if ($this->_cfg->mode == 0 || empty($data)) {
+        if ($this->_cfg->mode == 0) {
             $coid = $data['coid'];
         } else {
             if (!isset($_POST['coid'])) {
@@ -182,7 +218,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     }
     
     public function CommentMark ($data = NULL) {
-        if ($this->_cfg->mode == 0 || empty($data)) {
+        if ($this->_cfg->mode == 0) {
             $coid = $data['coid'];
             $status = $data['status'];
         } else {
@@ -194,7 +230,8 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
         }
         
         $ret = $this->mark($coid, $status);
-        if (!empty($ret)) {
+        file_put_contents('1', $ret);
+        if ($ret) {
             if ($this->_cfg->mode == 0) {
                 return array('code' => 0);
             } else {

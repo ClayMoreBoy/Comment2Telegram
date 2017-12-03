@@ -1,5 +1,5 @@
 # Comment2Typecho
-将  `Typecho` 的评论推送至 `Telegram` 通知，支持标记回复评论、垃圾评论和删除评论，
+将  `Typecho` 的评论推送至 `Telegram` 通知，支持回复评论、通过评论、垃圾评论和删除评论
 
 ## 使用
 1. 下载后请将插件目录名请修改为 `Comment2Typecho`

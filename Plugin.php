@@ -2,11 +2,11 @@
 require_once __DIR__ . '/Bootstrap.php';
 
 /**
- * 将 Typecho 的评论推送至 Telegram 通知
+ * Typecho 的评论推送至 Telegram 通知，支持回复评论、通过评论、垃圾评论和删除评论
  * 
  * @package Comment2Telegram
- * @author JclMiku
- * @version 1.0.0
+ * @author Momiji.Jin
+ * @version 1.1.0
  * @link https://jcl.moe
  */
 class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
@@ -49,7 +49,8 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
         $Token = new Typecho_Widget_Helper_Form_Element_Text('Token', NULL, NULL, _t('Token'), _t('需要输入指定Token'));
         $form->addInput($Token->addRule('required', _t('您必须填写一个正确的Token')));
         $MasterID = new Typecho_Widget_Helper_Form_Element_Text('MasterID', NULL, NULL, _t('MasterID'), _t('Telergam Master ID'));
-        $form->addInput($MasterID->addRule('required', _t('您必须填写一个正确的 Telegram ID')));   
+        $form->addInput($MasterID->addRule('required', _t('您必须填写一个正确的 Telegram ID')));
+        
     }
     
     /**
